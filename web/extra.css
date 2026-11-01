@@ -22,3 +22,53 @@
 .md-typeset table:not([class]) {
   font-size: 0.75rem;
 }
+
+/* "Download PDF" buttons at the top of each session */
+.md-typeset .pdf-download {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.2rem;
+}
+.md-typeset .pdf-download .md-button {
+  font-size: 0.7rem;
+  padding: 0.4em 1.2em;
+  margin: 0;
+}
+
+/* ---------- Printing / PDF ---------- */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .md-typeset .pdf-download,
+  .md-typeset .headerlink,
+  .md-clipboard,
+  .md-code__nav,
+  .md-code__button {
+    display: none !important;
+  }
+  /* long code lines wrap instead of being cut off */
+  .md-typeset pre > code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: visible;
+  }
+  .md-typeset div.arithmatex,
+  .md-typeset__scrollwrap,
+  .md-typeset__table {
+    overflow: visible !important;
+  }
+  .md-typeset img,
+  .md-typeset pre,
+  .md-typeset table {
+    break-inside: avoid;
+  }
+  .md-typeset h1, .md-typeset h2, .md-typeset h3 {
+    break-after: avoid;
+  }
+  .print-session + .print-session {
+    break-before: page;
+  }
+}

@@ -23,7 +23,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r web/requirements.txt
-      - run: bash web/build.sh
+      - run: python -m playwright install --with-deps chromium
+      - name: Build website
+        run: bash web/build.sh
+      - name: Make PDFs (each session + all sessions)
+        run: python web/make_pdfs.py site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

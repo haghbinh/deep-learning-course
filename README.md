@@ -7,6 +7,8 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 
 **نسخهٔ وب جزوه‌ها:** [haghbinh.github.io/deep-learning-course](https://haghbinh.github.io/deep-learning-course/)
 
+**دانلود PDF همهٔ جلسه‌ها:** [all-sessions.pdf](https://haghbinh.github.io/deep-learning-course/pdf/all-sessions.pdf) — PDF هر جلسه هم از دکمهٔ بالای صفحهٔ همان جلسه در سایت دریافت می‌شود.
+
 > برای خواندن جزوه‌ها از نسخهٔ وب استفاده کنید. نمایشگر فایل GitHub از راست‌چین بودن متن و کادرهای Obsidian (Callout) پشتیبانی نمی‌کند؛ پیوندهای جدول زیر مستقیماً به نسخهٔ وب هر جلسه می‌روند.
 
 ---
