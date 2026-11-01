@@ -1,0 +1,91 @@
+# GitHub Pages site for the lecture notes.
+# Built by .github/workflows/pages.yml, which copies the notes into docs/ first
+# (the notes stay where they are, so the Obsidian vault is unchanged).
+site_name: یادگیری عمیق — جزوه‌های درس
+site_url: https://haghbinh.github.io/deep-learning-course/
+repo_url: https://github.com/haghbinh/deep-learning-course
+repo_name: haghbinh/deep-learning-course
+edit_uri: ""
+docs_dir: docs
+site_dir: site
+use_directory_urls: false
+
+theme:
+  name: material
+  language: fa
+  direction: rtl
+  font:
+    text: Vazirmatn
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: حالت تیره
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: حالت روشن
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - صفحهٔ اصلی: index.md
+  - "فصل ۱۰ — شبکه‌های کانولوشنی":
+      - "جلسه 1": Chapter 10/Sec 1.md
+      - "جلسه 2": Chapter 10/Sec 2.md
+      - "جلسه 3": Chapter 10/Sec 3.md
+      - "جلسه 4": Chapter 10/Sec 4.md
+      - "پروژه 1": Chapter 10/Sec 4_hw1.md
+  - "فصل ۱۱ — شبکه‌های باقیمانده":
+      - "جلسه 5": Chapter 11/Sec 5.md
+      - "جلسه 6": Chapter 11/Sec 6.md
+      - "جلسه 7": Chapter 11/Sec 7.md
+      - "پروژه 2": Chapter 11/Sec 7_hw2.md
+  - "شبکه‌های بازگشتی (پیش‌زمینهٔ فصل ۱۲)":
+      - "جلسه 8": Chapter 12/Sec 8.md
+      - "جلسه 9": Chapter 12/Sec 9.md
+
+hooks:
+  - web/hooks.py
+
+plugins:
+  - search
+  - callouts
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.arithmatex:
+      generic: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra_css:
+  - assets/extra.css
+
+extra_javascript:
+  - assets/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js

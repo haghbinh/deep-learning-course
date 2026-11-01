@@ -7,21 +7,23 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 
 **نسخهٔ وب جزوه‌ها:** [haghbinh.github.io/deep-learning-course](https://haghbinh.github.io/deep-learning-course/)
 
+> برای خواندن جزوه‌ها از نسخهٔ وب استفاده کنید. نمایشگر فایل GitHub از راست‌چین بودن متن و کادرهای Obsidian (Callout) پشتیبانی نمی‌کند؛ پیوندهای جدول زیر مستقیماً به نسخهٔ وب هر جلسه می‌روند.
+
 ---
 
 ## فهرست جلسات
 
 | جلسه | فصل | موضوع | جزوه | تمرین |
 |:---:|:---|:---|:---:|:---:|
-| 1 | ۱۰ — شبکه‌های کانولوشنی | از پرسپترون چندلایه تا شبکه‌های کانولوشنی | [جلسه 1](Chapter%2010/Sec%201.md) | |
-| 2 | ۱۰ — شبکه‌های کانولوشنی | ناوردایی، هم‌وردایی و کانولوشن | [جلسه 2](Chapter%2010/Sec%202.md) | |
-| 3 | ۱۰ — شبکه‌های کانولوشنی | شبکه‌های کانولوشنی یک‌بعدی و میدان پذیرش | [جلسه 3](Chapter%2010/Sec%203.md) | |
-| 4 | ۱۰ — شبکه‌های کانولوشنی | شبکه‌های کانولوشنی دوبعدی | [جلسه 4](Chapter%2010/Sec%204.md) | [پروژه 1](Chapter%2010/Sec%204_hw1.md) |
-| 5 | ۱۱ — شبکه‌های باقیمانده | چرا به بلوک‌های باقیمانده نیاز داریم؟ | [جلسه 5](Chapter%2011/Sec%205.md) | |
-| 6 | ۱۱ — شبکه‌های باقیمانده | ترتیب عملیات در بلوک باقیمانده و نرمال‌سازی دسته‌ای | [جلسه 6](Chapter%2011/Sec%206.md) | |
-| 7 | ۱۱ — شبکه‌های باقیمانده | معماری‌های رایج: ResNet، DenseNet و U-Net | [جلسه 7](Chapter%2011/Sec%207.md) | [پروژه 2](Chapter%2011/Sec%207_hw2.md) |
-| 8 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | شبکه‌های عصبی بازگشتی (RNN) | [جلسه 8](Chapter%2012/Sec%208.md) | |
-| 9 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | پس‌انتشار در زمان، LSTM و GRU | [جلسه 9](Chapter%2012/Sec%209.md) | |
+| 1 | ۱۰ — شبکه‌های کانولوشنی | از پرسپترون چندلایه تا شبکه‌های کانولوشنی | [جلسه 1](https://haghbinh.github.io/deep-learning-course/Chapter%2010/Sec%201.html) | |
+| 2 | ۱۰ — شبکه‌های کانولوشنی | ناوردایی، هم‌وردایی و کانولوشن | [جلسه 2](https://haghbinh.github.io/deep-learning-course/Chapter%2010/Sec%202.html) | |
+| 3 | ۱۰ — شبکه‌های کانولوشنی | شبکه‌های کانولوشنی یک‌بعدی و میدان پذیرش | [جلسه 3](https://haghbinh.github.io/deep-learning-course/Chapter%2010/Sec%203.html) | |
+| 4 | ۱۰ — شبکه‌های کانولوشنی | شبکه‌های کانولوشنی دوبعدی | [جلسه 4](https://haghbinh.github.io/deep-learning-course/Chapter%2010/Sec%204.html) | [پروژه 1](https://haghbinh.github.io/deep-learning-course/Chapter%2010/Sec%204_hw1.html) |
+| 5 | ۱۱ — شبکه‌های باقیمانده | چرا به بلوک‌های باقیمانده نیاز داریم؟ | [جلسه 5](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%205.html) | |
+| 6 | ۱۱ — شبکه‌های باقیمانده | ترتیب عملیات در بلوک باقیمانده و نرمال‌سازی دسته‌ای | [جلسه 6](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%206.html) | |
+| 7 | ۱۱ — شبکه‌های باقیمانده | معماری‌های رایج: ResNet، DenseNet و U-Net | [جلسه 7](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%207.html) | [پروژه 2](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%207_hw2.html) |
+| 8 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | شبکه‌های عصبی بازگشتی (RNN) | [جلسه 8](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%208.html) | |
+| 9 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | پس‌انتشار در زمان، LSTM و GRU | [جلسه 9](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%209.html) | |
 | 10 | | | | |
 | 11 | | | | |
 | 12 | | | | |
@@ -54,7 +56,7 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 | `img/` | شکل‌های جزوه‌ها |
 | `Codes/` | نوت‌بوک‌های Jupyter جلسه‌ها |
 
-جزوه‌ها با Markdown در [Obsidian](https://obsidian.md) نوشته شده‌اند و فرمول‌ها با LaTeX هستند. برای خواندن آن‌ها می‌توانید از نسخهٔ وب استفاده کنید، فایل‌ها را مستقیماً در GitHub باز کنید، یا مخزن را دریافت و پوشه را به‌عنوان یک Vault در Obsidian باز کنید:
+جزوه‌ها با Markdown در [Obsidian](https://obsidian.md) نوشته شده‌اند و فرمول‌ها با LaTeX هستند. برای خواندن آن‌ها از نسخهٔ وب استفاده کنید، یا مخزن را دریافت و پوشه را به‌عنوان یک Vault در Obsidian باز کنید:
 
 ```bash
 git clone https://github.com/haghbinh/deep-learning-course.git
