@@ -10,12 +10,19 @@ Fixes:
     Python-Markdown needs.
   * code fences like ```python id="x1" lose the extra attributes;
   * session pages get "download PDF" buttons (the PDFs are made by
-    web/make_pdfs.py after the site is built).
+    web/make_pdfs.py after the site is built) and a course-information box
+    (course, instructor, university, chapter, session; see web/course.py).
 Lines inside fenced code blocks are never touched. Lines inside callouts
 (``> ...``) are handled with their ``>`` prefix kept.
 """
 
+import html
+import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+import course  # noqa: E402  (web/course.py)
 
 FENCE = re.compile(r"^\s*(```|~~~)")
 FENCE_ATTRS = re.compile(r"^((?:\s*>)*\s*(?:```|~~~)\s*[\w+-]+)\s+[^`]*$")
@@ -25,8 +32,15 @@ INLINE_DD = re.compile(r"\$\$(?=\S)(.+?)(?<=\S)\$\$")
 
 
 def _split(line):
+    """Split off a callout prefix ("> ") or, for indented lines (e.g. callouts
+    already converted to tab-indented admonitions), the leading whitespace."""
     m = PREFIX.match(line)
-    prefix = m.group(1) if ">" in m.group(1) else ""
+    if ">" in m.group(1):
+        prefix = m.group(1)
+    else:
+        lead = line[: len(line) - len(line.lstrip(" \t"))]
+        # only real block indentation (tab or 4+ spaces) is kept as a prefix
+        prefix = lead if ("\t" in lead or len(lead) >= 4) else ""
     return prefix, line[len(prefix):]
 
 
@@ -55,8 +69,31 @@ def _pdf_buttons(page):
     )
 
 
+def _info_box(page, config):
+    src = page.file.src_uri
+    if not src.startswith("Chapter "):
+        return ""
+    topics = course.readme_topics(os.path.join(config["docs_dir"], "index.md"))
+    chapter = page.parent.title if page.parent else ""
+    session = page.title or ""
+    topic = topics.get(src, "")
+    e = html.escape
+    rows = [
+        ("درس", course.COURSE_TITLE),
+        ("مدرس", course.INSTRUCTOR),
+        ("", course.UNIVERSITY),
+        ("", chapter),
+        (session, topic) if topic else ("", session),
+    ]
+    cells = "".join(
+        f'<div><span class="session-info__key">{e(k)}{":" if k else ""}</span> {e(v)}</div>'
+        for k, v in rows if v
+    )
+    return f'<div class="session-info" markdown="0">{cells}</div>\n\n'
+
+
 def on_page_markdown(markdown, page, config, files):
-    markdown = _pdf_buttons(page) + markdown
+    markdown = _pdf_buttons(page) + _info_box(page, config) + markdown
     out = []
     in_fence = False
     in_math = False

@@ -8,6 +8,12 @@
   unicode-bidi: isolate;
 }
 
+/* Each \text{...} inside a formula is its own bidi island: Persian text
+   reads right-to-left inside it, but the formula keeps its left-to-right order. */
+.md-typeset mjx-mtext {
+  unicode-bidi: plaintext;
+}
+
 .md-typeset div.arithmatex {
   overflow-x: auto;
   overflow-y: hidden;
@@ -34,6 +40,24 @@
   font-size: 0.7rem;
   padding: 0.4em 1.2em;
   margin: 0;
+}
+
+/* Course information box at the top of each session */
+.md-typeset .session-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 2rem;
+  margin: 0 0 1.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-inline-start: 4px solid var(--md-primary-fg-color);
+  border-radius: 0.2rem;
+  background: var(--md-code-bg-color);
+  font-size: 0.72rem;
+  line-height: 1.7;
+}
+.md-typeset .session-info__key {
+  font-weight: 700;
 }
 
 /* ---------- Printing / PDF ---------- */
@@ -67,8 +91,5 @@
   }
   .md-typeset h1, .md-typeset h2, .md-typeset h3 {
     break-after: avoid;
-  }
-  .print-session + .print-session {
-    break-before: page;
   }
 }

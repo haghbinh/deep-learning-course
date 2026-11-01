@@ -1,6 +1,8 @@
-# یادگیری عمیق — جزوه‌های درس
+# یادگیری عمیق 
 
-**Deep Learning — Persian Lecture Notes**
+**Deep Learning 
+
+**مدرس:** دکتر حسین حق‌بین — دانشگاه خلیج فارس
 
 جزوه‌های فارسی درس یادگیری عمیق، بر پایهٔ کتاب
 Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook.github.io](https://udlbook.github.io/udlbook/).
@@ -9,7 +11,6 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 
 **دانلود PDF همهٔ جلسه‌ها:** [all-sessions.pdf](https://haghbinh.github.io/deep-learning-course/pdf/all-sessions.pdf) — PDF هر جلسه هم از دکمهٔ بالای صفحهٔ همان جلسه در سایت دریافت می‌شود.
 
-> برای خواندن جزوه‌ها از نسخهٔ وب استفاده کنید. نمایشگر فایل GitHub از راست‌چین بودن متن و کادرهای Obsidian (Callout) پشتیبانی نمی‌کند؛ پیوندهای جدول زیر مستقیماً به نسخهٔ وب هر جلسه می‌روند.
 
 ---
 
