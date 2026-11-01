@@ -1,0 +1,23 @@
+# Obsidian
+.obsidian/
+
+# Data (downloaded by the notebooks)
+Codes/data/
+*.pkl
+*-ubyte
+*-ubyte.gz
+
+# Python / Jupyter
+__pycache__/
+.ipynb_checkpoints/
+*.pt
+*.pth
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dropbox
+*conflicted copy*
+.dropbox*
