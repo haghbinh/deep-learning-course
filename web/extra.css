@@ -1,0 +1,24 @@
+/* Code and math stay left-to-right inside the RTL page. */
+.md-typeset pre,
+.md-typeset code,
+.md-typeset .highlight,
+.md-typeset .arithmatex {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
+.md-typeset div.arithmatex {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.md-typeset img {
+  display: block;
+  margin: 1em auto;
+  max-width: 100%;
+}
+
+.md-typeset table:not([class]) {
+  font-size: 0.75rem;
+}
