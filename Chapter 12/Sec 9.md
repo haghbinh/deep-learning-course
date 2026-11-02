@@ -12,90 +12,222 @@
 
 ---
 
-### گرادیان نسبت به حالت‌های پنهان
+### نمادها
 
-برای راحتی، ورودی تابع فعال‌سازی را $\mathbf{z}_t$ می‌نامیم:
+ورودی تابع فعال‌سازی را $\mathbf{z}_t$ می‌نامیم. گذر رو به جلو در هر گام چنین است:
 
 $$
-\mathbf{z}_t = \boldsymbol{\beta}_h + \boldsymbol{\Omega}_{xh}\,\mathbf{x}_t + \boldsymbol{\Omega}_{hh}\,\mathbf{h}_{t-1}, \qquad \mathbf{h}_t = \mathbf{a}[\mathbf{z}_t]
+\mathbf{z}_t = \boldsymbol{\beta}_h + \boldsymbol{\Omega}_{xh}\,\mathbf{x}_t + \boldsymbol{\Omega}_{hh}\,\mathbf{h}_{t-1}, \qquad
+\mathbf{h}_t = \mathbf{a}[\mathbf{z}_t], \qquad
+\hat{\mathbf{y}}_t = \boldsymbol{\beta}_y + \boldsymbol{\Omega}_{hy}\,\mathbf{h}_t
 $$
 
 زیان کل، جمع زیان گام‌هاست: $$L = \sum_{t} L_t$$ که در آن $$L_t = \ell\big[\hat{\mathbf{y}}_t,\ \mathbf{y}_t\big]$$ (در مسئلهٔ چندبه‌یک فقط $L_T$ وجود دارد).
 
-نکتهٔ کلیدی این است که حالت پنهان $\mathbf{h}_t$ از **دو مسیر** روی زیان اثر می‌گذارد:
-
-- **مستقیم:** از طریق خروجی همان گام، $\hat{\mathbf{y}}_t$ (پیکان رو به بالا در شکل باز شدن شبکه)،
-- **غیرمستقیم:** از طریق حالت پنهان گام بعد، $\mathbf{h}_{t+1}$، و در نتیجه همهٔ گام‌های آینده (پیکان افقی).
-
-بنابراین گرادیان به‌صورت بازگشتی، از آخر به اول، محاسبه می‌شود:
-
-$$
-\frac{\partial L}{\partial \mathbf{h}_t} = \underbrace{\frac{\partial L_t}{\partial \mathbf{h}_t}}_{\text{مسیر مستقیم}} + \underbrace{\mathbf{J}_{t+1}^{\top}\, \frac{\partial L}{\partial \mathbf{h}_{t+1}}}_{\text{مسیر از آینده}}
-$$
-
-که در آن $\mathbf{J}_{t+1}$ **ژاکوبی** (Jacobian) حالت پنهان نسبت به حالت قبلی است:
-
-$$
-\mathbf{J}_{t+1} = \frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{h}_t} = \text{diag}\big(\mathbf{a}'[\mathbf{z}_{t+1}]\big)\,\boldsymbol{\Omega}_{hh}
-$$
-
-در گام آخر جملهٔ «مسیر از آینده» وجود ندارد و بازگشت از $$\frac{\partial L}{\partial \mathbf{h}_T} = \frac{\partial L_T}{\partial \mathbf{h}_T}$$ شروع می‌شود.
+هدف نهایی، گرادیان $L$ نسبت به پنج پارامتر مشترک است: $\boldsymbol{\Omega}_{hy}$، $\boldsymbol{\beta}_y$، $\boldsymbol{\Omega}_{hh}$، $\boldsymbol{\Omega}_{xh}$ و $\boldsymbol{\beta}_h$. برای رسیدن به آن، در گذر رو به عقب چهار قدم زیر را برمی‌داریم.
 
 ---
 
-### گرادیان نسبت به وزن‌های مشترک
+### قدم ۱: خطای خروجی در هر گام
 
-چون یک ماتریس $\boldsymbol{\Omega}_{hh}$ در **همهٔ** گام‌ها به کار رفته است، گرادیان آن **جمع سهم همهٔ گام‌ها** است:
+از بالای شبکه شروع می‌کنیم. گرادیان زیان نسبت به خروجی هر گام را **خطای خروجی** می‌نامیم و با $\mathbf{e}_t$ نشان می‌دهیم.
+
+**قاعده:** چون $$L = \sum_{s} L_s$$ و از میان جمله‌های این جمع فقط $L_t$ به $\hat{\mathbf{y}}_t$ وابسته است:
+
+$$
+\mathbf{e}_t = \frac{\partial L}{\partial \hat{\mathbf{y}}_t} = \frac{\partial L_t}{\partial \hat{\mathbf{y}}_t}
+$$
+
+**جایگذاری:** مقدار این مشتق به تابع زیان بستگی دارد:
+
+- برای خطای مربعی، $$L_t = \tfrac{1}{2}\big\|\hat{\mathbf{y}}_t - \mathbf{y}_t\big\|^2$$ و در نتیجه $$\mathbf{e}_t = \hat{\mathbf{y}}_t - \mathbf{y}_t$$
+- برای آنتروپی متقاطع (با softmax)، $$\mathbf{e}_t = \text{softmax}(\hat{\mathbf{y}}_t) - \mathbf{y}_t$$
+
+اگر گام $t$ در زیان شرکت نداشته باشد (مثلاً گام‌های $t < T$ در مسئلهٔ چندبه‌یک)، $\mathbf{e}_t = \mathbf{0}$ است.
+
+---
+
+### قدم ۲: گرادیان حالت پنهان، از آخر به اول
+
+حالت پنهان $\mathbf{h}_t$ از **دو مسیر** روی زیان اثر می‌گذارد:
+
+- **مستقیم:** از طریق خروجی همان گام، $\hat{\mathbf{y}}_t$ (پیکان رو به بالا در شکل باز شدن شبکه)؛
+- **از آینده:** از طریق حالت پنهان گام بعد، $\mathbf{h}_{t+1}$، و در نتیجه همهٔ گام‌های بعدی (پیکان افقی).
+
+منظور از $\partial L / \partial \mathbf{h}_t$ اثر **کل** $\mathbf{h}_t$ روی زیان است، یعنی مجموع هر دو مسیر.
+
+**الف) گام آخر.** حالت $\mathbf{h}_T$ فقط از مسیر مستقیم روی زیان اثر دارد.
+
+**قاعده:**
+
+$$
+\frac{\partial L}{\partial \mathbf{h}_T} = \left(\frac{\partial \hat{\mathbf{y}}_T}{\partial \mathbf{h}_T}\right)^{\!\top} \frac{\partial L}{\partial \hat{\mathbf{y}}_T}
+$$
+
+**جایگذاری:** از رابطهٔ خطی $$\hat{\mathbf{y}}_T = \boldsymbol{\beta}_y + \boldsymbol{\Omega}_{hy}\,\mathbf{h}_T$$ داریم $$\frac{\partial \hat{\mathbf{y}}_T}{\partial \mathbf{h}_T} = \boldsymbol{\Omega}_{hy}$$ و از قدم ۱ داریم $$\frac{\partial L}{\partial \hat{\mathbf{y}}_T} = \mathbf{e}_T$$ پس:
+
+$$
+\frac{\partial L}{\partial \mathbf{h}_T} = \boldsymbol{\Omega}_{hy}^{\top}\, \mathbf{e}_T
+$$
+
+یعنی خطای خروجی از همان وزن‌های $\boldsymbol{\Omega}_{hy}$ به حالت پنهان برمی‌گردد، درست مانند آخرین لایهٔ پنهان یک MLP.
+
+**ب) گام‌های قبلی،** $$t = T-1, \dots, 1$$
+
+**قاعده:** این بار $\mathbf{h}_t$ هم از طریق $\hat{\mathbf{y}}_t$ و هم از طریق $\mathbf{h}_{t+1}$ روی زیان اثر دارد؛ پس سهم دو مسیر با هم جمع می‌شود:
+
+$$
+\frac{\partial L}{\partial \mathbf{h}_t} =
+\underbrace{\left(\frac{\partial \hat{\mathbf{y}}_t}{\partial \mathbf{h}_t}\right)^{\!\top} \frac{\partial L}{\partial \hat{\mathbf{y}}_t}}_{\text{مسیر مستقیم}}
++
+\underbrace{\left(\frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{h}_t}\right)^{\!\top} \frac{\partial L}{\partial \mathbf{h}_{t+1}}}_{\text{مسیر از آینده}}
+$$
+
+**جایگذاری:** جملهٔ اول مثل گام آخر برابر $\boldsymbol{\Omega}_{hy}^{\top}\mathbf{e}_t$ است. در جملهٔ دوم، مقدار $\partial L / \partial \mathbf{h}_{t+1}$ پیش‌تر محاسبه شده است (چون گذر رو به عقب از $T$ شروع شده، گام $t+1$ پیش از گام $t$ محاسبه می‌شود) و فقط ژاکوبی $\partial \mathbf{h}_{t+1} / \partial \mathbf{h}_t$ باقی می‌ماند. این ژاکوبی را $\mathbf{J}_{t+1}$ می‌نامیم. چون $\mathbf{h}_t$ از طریق $\mathbf{z}_{t+1}$ روی $\mathbf{h}_{t+1}$ اثر دارد، طبق قاعدهٔ زنجیره‌ای:
+
+$$
+\mathbf{J}_{t+1} = \frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{h}_t} = \frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{z}_{t+1}}\; \frac{\partial \mathbf{z}_{t+1}}{\partial \mathbf{h}_t}
+$$
+
+- از رابطهٔ $$\mathbf{z}_{t+1} = \boldsymbol{\beta}_h + \boldsymbol{\Omega}_{xh}\,\mathbf{x}_{t+1} + \boldsymbol{\Omega}_{hh}\,\mathbf{h}_t$$ داریم $$\frac{\partial \mathbf{z}_{t+1}}{\partial \mathbf{h}_t} = \boldsymbol{\Omega}_{hh}$$
+- چون $$\mathbf{h}_{t+1} = \mathbf{a}[\mathbf{z}_{t+1}]$$ و تابع فعال‌سازی عنصربه‌عنصر اعمال می‌شود، هر مؤلفهٔ $\mathbf{h}_{t+1}$ فقط به مؤلفهٔ متناظر در $\mathbf{z}_{t+1}$ وابسته است و ژاکوبی آن **قطری** است: $$\frac{\partial \mathbf{h}_{t+1}}{\partial \mathbf{z}_{t+1}} = \text{diag}\big(\mathbf{a}'[\mathbf{z}_{t+1}]\big)$$ برای $\tanh$ داریم $$\tanh'(z) = 1 - \tanh^2(z)$$ پس $$\mathbf{a}'[\mathbf{z}_{t+1}] = 1 - \mathbf{h}_{t+1}^2$$ که از گذر رو به جلو در دسترس است.
+
+بنابراین:
+
+$$
+\mathbf{J}_{t+1} = \text{diag}\big(\mathbf{a}'[\mathbf{z}_{t+1}]\big)\,\boldsymbol{\Omega}_{hh}
+\qquad\Longrightarrow\qquad
+\frac{\partial L}{\partial \mathbf{h}_t} = \underbrace{\boldsymbol{\Omega}_{hy}^{\top}\, \mathbf{e}_t}_{\text{مسیر مستقیم}} + \underbrace{\mathbf{J}_{t+1}^{\top}\, \frac{\partial L}{\partial \mathbf{h}_{t+1}}}_{\text{مسیر از آینده}}
+$$
+
+با این رابطه، همهٔ $\partial L / \partial \mathbf{h}_t$ ها یکی پس از دیگری از $$t = T-1$$ تا $$t = 1$$ محاسبه می‌شوند.
+
+---
+
+### قدم ۳: گرادیان ورودی تابع فعال‌سازی
+
+گرادیان پارامترهای لایهٔ بازگشتی (قدم ۴) به $\partial L / \partial \mathbf{z}_t$ نیاز دارد، چون این پارامترها از طریق $\mathbf{z}_t$ روی زیان اثر می‌گذارند.
+
+**قاعده:** متغیر $\mathbf{z}_t$ فقط از طریق $\mathbf{h}_t$ روی زیان اثر دارد:
+
+$$
+\frac{\partial L}{\partial \mathbf{z}_t} = \left(\frac{\partial \mathbf{h}_t}{\partial \mathbf{z}_t}\right)^{\!\top} \frac{\partial L}{\partial \mathbf{h}_t}
+$$
+
+**جایگذاری:** ژاکوبی $\partial \mathbf{h}_t / \partial \mathbf{z}_t$ همان ماتریس قطری $\text{diag}\big(\mathbf{a}'[\mathbf{z}_t]\big)$ است که در قدم ۲ دیدیم، و $\partial L / \partial \mathbf{h}_t$ از قدم ۲ در دسترس است. ضرب یک ماتریس قطری در یک بردار، همان ضرب عنصربه‌عنصر است؛ پس:
+
+$$
+\frac{\partial L}{\partial \mathbf{z}_t} = \mathbf{a}'[\mathbf{z}_t] \odot \frac{\partial L}{\partial \mathbf{h}_t}
+$$
+
+---
+
+### قدم ۴: گرادیان پارامترها
+
+**قاعده:** دو قاعده لازم داریم.
+
+- **لایهٔ خطی:** برای رابطهٔ خطی $$\mathbf{u} = \boldsymbol{\beta} + \boldsymbol{\Omega}\,\mathbf{v}$$ (همان قاعدهٔ لایهٔ تمام‌متصل در MLP):
+
+$$
+\frac{\partial L}{\partial \boldsymbol{\Omega}} = \frac{\partial L}{\partial \mathbf{u}}\; \mathbf{v}^{\top},
+\qquad
+\frac{\partial L}{\partial \boldsymbol{\beta}} = \frac{\partial L}{\partial \mathbf{u}}
+$$
+
+- **پارامتر مشترک:** هر پارامتر در **همهٔ** گام‌ها به کار رفته است؛ پس گرادیان آن **جمع سهم همهٔ گام‌ها** است. در محاسبهٔ سهم گام $t$ فقط اثر **مستقیم** پارامتر در همان گام را در نظر می‌گیریم؛ اثر غیرمستقیم آن از طریق $\mathbf{h}_{t-1}$ در سهم گام‌های قبلی همین جمع آمده است.
+
+**جایگذاری — لایهٔ بازگشتی:** در هر گام، $$\mathbf{z}_t = \boldsymbol{\beta}_h + \boldsymbol{\Omega}_{xh}\,\mathbf{x}_t + \boldsymbol{\Omega}_{hh}\,\mathbf{h}_{t-1}$$ یک رابطهٔ خطی است که در آن نقش $\mathbf{u}$ را $\mathbf{z}_t$ دارد و نقش $\mathbf{v}$ را $\mathbf{h}_{t-1}$ (برای $\boldsymbol{\Omega}_{hh}$) یا $\mathbf{x}_t$ (برای $\boldsymbol{\Omega}_{xh}$). با جمع روی گام‌ها:
 
 $$
 \frac{\partial L}{\partial \boldsymbol{\Omega}_{hh}} = \sum_{t=1}^{T} \frac{\partial L}{\partial \mathbf{z}_t}\, \mathbf{h}_{t-1}^{\top},
 \qquad
-\frac{\partial L}{\partial \mathbf{z}_t} = \mathbf{a}'[\mathbf{z}_t] \odot \frac{\partial L}{\partial \mathbf{h}_t}
-$$
-
-به همین ترتیب:
-
-$$
 \frac{\partial L}{\partial \boldsymbol{\Omega}_{xh}} = \sum_{t=1}^{T} \frac{\partial L}{\partial \mathbf{z}_t}\, \mathbf{x}_t^{\top},
 \qquad
 \frac{\partial L}{\partial \boldsymbol{\beta}_h} = \sum_{t=1}^{T} \frac{\partial L}{\partial \mathbf{z}_t}
 $$
 
+**جایگذاری — لایهٔ خروجی:** در هر گام، $$\hat{\mathbf{y}}_t = \boldsymbol{\beta}_y + \boldsymbol{\Omega}_{hy}\,\mathbf{h}_t$$ یک رابطهٔ خطی است که در آن نقش $\mathbf{u}$ را $\hat{\mathbf{y}}_t$ دارد (با $$\frac{\partial L}{\partial \hat{\mathbf{y}}_t} = \mathbf{e}_t$$ از قدم ۱) و نقش $\mathbf{v}$ را $\mathbf{h}_t$. با جمع روی گام‌ها:
+
+$$
+\frac{\partial L}{\partial \boldsymbol{\Omega}_{hy}} = \sum_{t=1}^{T} \mathbf{e}_t\, \mathbf{h}_t^{\top},
+\qquad
+\frac{\partial L}{\partial \boldsymbol{\beta}_y} = \sum_{t=1}^{T} \mathbf{e}_t
+$$
+
 > [!note] نکتهٔ کلیدی
 > جمع شدن گرادیان روی گام‌های زمانی، نتیجهٔ مستقیم **اشتراک پارامتر** است. در CNN هم (فصل ۱۰) گرادیان یک هسته، جمع سهم آن در **همهٔ موقعیت‌های مکانی** بود؛ اینجا جمع سهم در **همهٔ گام‌های زمانی** است.
+
+> [!example] مثال عددی: چهار قدم روی مثال بخش سوم
+> در مثال اسکالر بخش سوم ($\omega_{xh} = 1$، $\omega_{hh} = 0.5$، ورودی $1, 0, 0$ و $h_1 = 0.762$، $h_2 = 0.364$، $h_3 = 0.180$) یک لایهٔ خروجی با $\omega_{hy} = 2$ و $\beta_y = 0$ اضافه می‌کنیم. مسئله چندبه‌یک است، زیان خطای مربعی و مقدار واقعی $y = 1$.
+>
+> **قدم ۱:**
+>
+> $$
+> \hat{y}_3 = \omega_{hy}\, h_3 = 2 \times 0.180 = 0.36,
+> \qquad
+> e_3 = \hat{y}_3 - y = 0.36 - 1 = -0.64,
+> \qquad
+> e_1 = e_2 = 0
+> $$
+>
+> **قدم ۲** (از $t = 3$ تا $t = 1$؛ چون $e_1 = e_2 = 0$، در گام‌های ۲ و ۱ فقط مسیر از آینده باقی می‌ماند):
+>
+> $$
+> \begin{aligned}
+> \frac{\partial L}{\partial h_3} &= \omega_{hy}\, e_3 = 2 \times (-0.64) = -1.28 \\
+> J_3 &= (1 - h_3^2)\,\omega_{hh} = (1 - 0.180^2) \times 0.5 \approx 0.484,
+> &\qquad
+> \frac{\partial L}{\partial h_2} &= J_3\, \frac{\partial L}{\partial h_3} \approx 0.484 \times (-1.28) \approx -0.62 \\
+> J_2 &= (1 - h_2^2)\,\omega_{hh} = (1 - 0.364^2) \times 0.5 \approx 0.434,
+> &\qquad
+> \frac{\partial L}{\partial h_1} &= J_2\, \frac{\partial L}{\partial h_2} \approx 0.434 \times (-0.62) \approx -0.27
+> \end{aligned}
+> $$
+>
+> **قدم ۳:**
+>
+> $$
+> \begin{aligned}
+> \frac{\partial L}{\partial z_3} &= (1 - h_3^2)\, \frac{\partial L}{\partial h_3} = (1 - 0.180^2) \times (-1.28) \approx -1.24 \\
+> \frac{\partial L}{\partial z_2} &= (1 - h_2^2)\, \frac{\partial L}{\partial h_2} = (1 - 0.364^2) \times (-0.62) \approx -0.54 \\
+> \frac{\partial L}{\partial z_1} &= (1 - h_1^2)\, \frac{\partial L}{\partial h_1} = (1 - 0.762^2) \times (-0.27) \approx -0.11
+> \end{aligned}
+> $$
+>
+> **قدم ۴** (با $h_0 = 0$ و ورودی $x_1 = 1$، $x_2 = x_3 = 0$):
+>
+> $$
+> \begin{aligned}
+> \frac{\partial L}{\partial \omega_{hy}} &= \sum_{t} e_t\, h_t = 0 + 0 + (-0.64)(0.180) \approx -0.12 \\
+> \frac{\partial L}{\partial \omega_{hh}} &= \sum_{t} \frac{\partial L}{\partial z_t}\, h_{t-1} = (-0.11)(0) + (-0.54)(0.762) + (-1.24)(0.364) \approx -0.86 \\
+> \frac{\partial L}{\partial \omega_{xh}} &= \sum_{t} \frac{\partial L}{\partial z_t}\, x_t = (-0.11)(1) + (-0.54)(0) + (-1.24)(0) \approx -0.11
+> \end{aligned}
+> $$
+>
+> همهٔ گرادیان‌ها منفی‌اند: بزرگ‌تر کردن این وزن‌ها پیش‌بینی ($0.36$) را به مقدار واقعی ($1$) نزدیک‌تر و زیان را کمتر می‌کند. همچنین $\omega_{xh}$ فقط از گام اول گرادیان می‌گیرد، چون فقط $x_1$ غیرصفر است؛ و این گرادیان پس از عبور از دو گام به عقب، از همه کوچک‌تر است.
 
 ---
 
 ### حاصل‌ضرب ژاکوبی‌ها
 
-اگر بازگشت بالا را باز کنیم، اثر حالت پنهان یک گام دور، $\mathbf{h}_k$، روی حالت پنهان گام $T$ برابر است با **حاصل‌ضرب** ژاکوبی‌های همهٔ گام‌های میان آن‌ها:
+رابطهٔ بازگشتی قدم ۲ را می‌توان باز کرد تا ببینیم گرادیان یک گام دور چگونه ساخته می‌شود. در مسئلهٔ چندبه‌یک، برای $t < T$ داریم $\mathbf{e}_t = \mathbf{0}$ و فقط مسیر از آینده باقی می‌ماند؛ پس با تکرار رابطهٔ قدم ۲ از $T$ تا گام $k$:
 
 $$
-\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k} = \mathbf{J}_T\, \mathbf{J}_{T-1} \cdots \mathbf{J}_{k+1} = \prod_{t=k+1}^{T} \text{diag}\big(\mathbf{a}'[\mathbf{z}_t]\big)\,\boldsymbol{\Omega}_{hh}
+\frac{\partial L}{\partial \mathbf{h}_k} = \mathbf{J}_{k+1}^{\top}\, \mathbf{J}_{k+2}^{\top} \cdots \mathbf{J}_T^{\top}\, \frac{\partial L}{\partial \mathbf{h}_T} = \left(\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k}\right)^{\!\top} \frac{\partial L}{\partial \mathbf{h}_T},
+\qquad
+\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k} = \mathbf{J}_T\, \mathbf{J}_{T-1} \cdots \mathbf{J}_{k+1}
 $$
 
-هرچه فاصلهٔ $T-k$ بیشتر باشد، تعداد جمله‌های این حاصل‌ضرب بیشتر است. این همان ساختاری است که در فصل ۱۱ برای شبکه‌های عمیق دیدیم؛ با این تفاوت که اینجا **همان** ماتریس $\boldsymbol{\Omega}_{hh}$ بارها در خودش ضرب می‌شود.
+یعنی اثر حالت پنهان گام $k$ روی حالت پنهان گام $T$ (و در نتیجه سهم آن از گرادیان) برابر **حاصل‌ضرب** ژاکوبی‌های همهٔ گام‌های میان آن‌هاست. هرچه فاصلهٔ $T-k$ بیشتر باشد، تعداد جمله‌های این حاصل‌ضرب بیشتر است. این همان ساختاری است که در فصل ۱۱ برای شبکه‌های عمیق دیدیم؛ با این تفاوت که اینجا **همان** ماتریس $\boldsymbol{\Omega}_{hh}$ در همهٔ جمله‌ها تکرار می‌شود.
 
-> [!example] مثال عددی
-> در مثال اسکالر بخش سوم ($\omega_{hh} = 0.5$ و $h_2 = 0.364$ و $h_3 = 0.180$)، با توجه به اینکه $$\tanh'(z) = 1 - \tanh^2(z)$$:
->
-> $$
-> \frac{\partial h_3}{\partial h_1} = \underbrace{(1 - 0.364^2) \times 0.5}_{J_2 \,\approx\, 0.434} \times \underbrace{(1 - 0.180^2) \times 0.5}_{J_3 \,\approx\, 0.484} \approx 0.21
-> $$
->
-> یعنی پس از تنها دو گام، گرادیان به حدود یک‌پنجم کاهش یافته است. در بخش بعد می‌بینیم که این حاصل‌ضرب برای دنباله‌های بلند چه مشکلی ایجاد می‌کند.
-
+در مثال عددی بالا، $$\frac{\partial h_3}{\partial h_1} = J_3\, J_2 \approx 0.484 \times 0.434 \approx 0.21$$ یعنی پس از تنها دو گام، گرادیان به حدود یک‌پنجم کاهش یافته است ($-1.28$ در گام ۳ و $-0.27$ در گام ۱). در بخش بعد می‌بینیم که این حاصل‌ضرب برای دنباله‌های بلند چه مشکلی ایجاد می‌کند.
 
 ---
 ## بخش ششم: گرادیان‌های محوشونده و انفجاری در RNN
 
 ### ریشهٔ مشکل: ضرب مکرر یک ماتریس
 
-در بخش پنجم دیدیم که اثر حالت پنهان گام $k$ روی حالت پنهان گام $T$، حاصل‌ضرب $T-k$ ژاکوبی است:
-
-$$
-\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k} = \prod_{t=k+1}^{T} \text{diag}\big(\mathbf{a}'[\mathbf{z}_t]\big)\,\boldsymbol{\Omega}_{hh}
-$$
+در بخش پنجم دیدیم که اثر حالت پنهان گام $k$ روی حالت پنهان گام $T$، حاصل‌ضرب $T-k$ ژاکوبی است: $$\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k} = \mathbf{J}_T \cdots \mathbf{J}_{k+1}$$ که در آن هر ژاکوبی به شکل $$\mathbf{J}_t = \text{diag}\big(\mathbf{a}'[\mathbf{z}_t]\big)\,\boldsymbol{\Omega}_{hh}$$ است.
 
 در فصل ۱۱ با همین ساختار برای شبکه‌های عمیق آشنا شدیم: ضرب تعداد زیادی جمله در هم ناپایدار است. با همان تشبیه اسکالر:
 
@@ -103,7 +235,7 @@ $$
 0.9^{50} \approx 0.005 \qquad \qquad 1.1^{50} \approx 117
 $$
 
-اما در RNN وضعیت حادتر است: در یک شبکهٔ پیش‌خور عمیق هر لایه ماتریس وزن **خودش** را دارد، ولی در RNN **همان** ماتریس $\boldsymbol{\Omega}_{hh}$ در هر گام دوباره ضرب می‌شود. بنابراین اندازهٔ این حاصل‌ضرب عمدتاً به **بزرگ‌ترین مقدار تکین** (Largest singular value) ماتریس $\boldsymbol{\Omega}_{hh}$، یعنی $\sigma_{\max}$، بستگی دارد. از آنجا که مشتق $\tanh$ هرگز از ۱ بیشتر نیست:
+اما در RNN وضعیت حادتر است: در یک شبکهٔ پیش‌خور عمیق هر لایه ماتریس وزن **خودش** را دارد، ولی در RNN **همان** ماتریس $\boldsymbol{\Omega}_{hh}$ در هر گام دوباره ضرب می‌شود. بنابراین اندازهٔ این حاصل‌ضرب عمدتاً به **بزرگ‌ترین مقدار تکین** (Largest singular value) ماتریس $\boldsymbol{\Omega}_{hh}$، یعنی $\sigma_{\max}$، بستگی دارد. از آنجا که برای $\tanh$ هیچ مؤلفه‌ای از $\mathbf{a}'[\mathbf{z}_t]$ از ۱ بیشتر نیست، نُرم هر ژاکوبی $\mathbf{J}_t$ حداکثر $\sigma_{\max}$ است و:
 
 $$
 \left\| \frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_k} \right\| \;\le\; \big(\sigma_{\max}(\boldsymbol{\Omega}_{hh})\big)^{T-k}
@@ -113,19 +245,13 @@ $$
 - اگر $\sigma_{\max} > 1$ باشد، گرادیان **ممکن است** به‌صورت نمایی بزرگ شود: **گرادیان انفجاری** (Exploding gradient).
 
 > [!note] نکتهٔ کلیدی
-> اشباع تابع $\tanh$ مشکل محوشدگی را شدیدتر می‌کند: وقتی $|\mathbf{z}_t|$ بزرگ است، $\tanh'(\mathbf{z}_t)$ نزدیک صفر است و ژاکوبی آن گام تقریباً صفر می‌شود. در مثال عددی بخش پنجم، هر ژاکوبی کمتر از $0.5$ بود و گرادیان پس از تنها دو گام به حدود $0.21$ رسید؛ پس از ۲۰ گام با همین نرخ، کمتر از یک‌میلیونیم باقی می‌ماند.
+> اشباع تابع $\tanh$ مشکل محوشدگی را شدیدتر می‌کند: وقتی مؤلفه‌ای از $\mathbf{z}_t$ از نظر قدرمطلق بزرگ است، مؤلفهٔ متناظر در $\mathbf{a}'[\mathbf{z}_t]$ نزدیک صفر است و ژاکوبی $\mathbf{J}_t$ در آن راستا تقریباً صفر می‌شود. در مثال عددی بخش پنجم، هر ژاکوبی کمتر از $0.5$ بود و گرادیان پس از تنها دو گام به حدود $0.21$ رسید؛ پس از ۲۰ گام با همین نرخ، کمتر از یک‌میلیونیم باقی می‌ماند.
 
 ---
 
 ### پیامد: وابستگی‌های بلندمدت یاد گرفته نمی‌شوند
 
-در بخش پنجم دیدیم که گرادیان نسبت به وزن‌های مشترک، **جمع** سهم همهٔ گام‌هاست:
-
-$$
-\frac{\partial L}{\partial \boldsymbol{\Omega}_{hh}} = \sum_{t=1}^{T} \frac{\partial L}{\partial \mathbf{z}_t}\, \mathbf{h}_{t-1}^{\top}
-$$
-
-وقتی گرادیان محو می‌شود، سهم گام‌های **دور** در این جمع تقریباً صفر است و جمع تقریباً فقط از گام‌های **نزدیک** ساخته می‌شود. نتیجه این است که وزن‌ها طوری به‌روز می‌شوند که مدل وابستگی‌های **کوتاه‌مدت** را یاد بگیرد و وابستگی‌های **بلندمدت** عملاً در آموزش دیده نمی‌شوند.
+در بخش پنجم (قدم ۴) دیدیم که گرادیان نسبت به وزن‌های مشترک، **جمع** سهم همهٔ گام‌هاست. وقتی گرادیان محو می‌شود، سهم گام‌های **دور** در این جمع تقریباً صفر است و جمع تقریباً فقط از گام‌های **نزدیک** ساخته می‌شود. نتیجه این است که وزن‌ها طوری به‌روز می‌شوند که مدل وابستگی‌های **کوتاه‌مدت** را یاد بگیرد و وابستگی‌های **بلندمدت** عملاً در آموزش دیده نمی‌شوند.
 
 > [!example] شهود
 > در جملهٔ بخش اول («**علی** که سال‌ها در خارج از کشور زندگی کرده بود و تازه به شهرش برگشته بود، از دیدن دوستان قدیمی‌**اش** خوشحال شد»)، برای اینکه مدل یاد بگیرد «ـَش» به «علی» برمی‌گردد، خطای پیش‌بینی در انتهای جمله باید از روی ده‌ها گام به عقب برسد. با گرادیان محوشونده، این سیگنال پیش از رسیدن به «علی» تقریباً از بین رفته است.
@@ -165,7 +291,7 @@ $$
 ---
 ## بخش هفتم: حافظهٔ کوتاه‌مدت طولانی (LSTM)
 
-در بخش ششم دیدیم که مشکل RNN ساده این است که حالت پنهان در **هر گام کاملاً بازنویسی** می‌شود و گرادیان برای رسیدن به گام‌های دور باید بارها در $\boldsymbol{\Omega}_{hh}$ و $\tanh'$ ضرب شود. شبکهٔ **حافظهٔ کوتاه‌مدت طولانی** (Long Short-Term Memory, LSTM) این مشکل را با دو ایده حل می‌کند:
+در بخش ششم دیدیم که مشکل RNN ساده این است که حالت پنهان در **هر گام کاملاً بازنویسی** می‌شود و گرادیان برای رسیدن به گام‌های دور باید بارها در ژاکوبی $\mathbf{J}_t$ (بخش پنجم) ضرب شود. شبکهٔ **حافظهٔ کوتاه‌مدت طولانی** (Long Short-Term Memory, LSTM) این مشکل را با دو ایده حل می‌کند:
 
 - یک حافظهٔ جداگانه به نام **حالت سلول** (Cell state) $\mathbf{c}_t$ که به‌صورت **جمعی** به‌روز می‌شود، نه با بازنویسی کامل.
 - سه **دروازه** (Gate) که یاد می‌گیرند در هر گام چه چیزی از حافظه پاک شود، چه چیزی به آن اضافه شود و چه چیزی از آن خوانده شود.
@@ -233,7 +359,7 @@ $$
 این را با RNN ساده (بخش ششم) مقایسه کنید:
 
 - در این مسیر **هیچ ضربی در ماتریس وزن** $\boldsymbol{\Omega}_{hh}$ وجود ندارد.
-- در این مسیر **هیچ مشتق** $\tanh'$ (و در نتیجه هیچ اشباعی) وجود ندارد.
+- در این مسیر **هیچ مشتق تابع فعال‌سازی** $\mathbf{a}'[\cdot]$ (و در نتیجه هیچ اشباعی) وجود ندارد.
 - مقدار $\mathbf{f}_t$ **یاد گرفته می‌شود**: اگر نگه داشتن یک اطلاعات برای مسئله مفید باشد، مدل یاد می‌گیرد دروازهٔ فراموشی آن مؤلفه را نزدیک ۱ نگه دارد و گرادیان تقریباً بدون تضعیف از روی ده‌ها گام عبور می‌کند.
 
 > [!note] ارتباط با شبکه‌های باقیمانده
@@ -311,7 +437,7 @@ $$
 ![gru_cell](../img/gru_cell.png)
 
 > [!note] ارتباط با LSTM و شبکه‌های باقیمانده
-> مسیر مستقیم حافظه در GRU مانند LSTM است: در این مسیر، مشتق $\mathbf{h}_t$ نسبت به $\mathbf{h}_{t-1}$ برابر $$\text{diag}\big(\mathbf{1} - \mathbf{u}_t\big)$$ است و هیچ ضربی در $\boldsymbol{\Omega}_{hh}$ یا $\tanh'$ ندارد. در واقع $\mathbf{1} - \mathbf{u}_t$ نقش دروازهٔ فراموشی و $\mathbf{u}_t$ نقش دروازهٔ ورودی LSTM را دارد، با این قید که این دو **به هم وابسته‌اند**: هرچه بیشتر اضافه شود، همان‌قدر بیشتر فراموش می‌شود.
+> مسیر مستقیم حافظه در GRU مانند LSTM است: در این مسیر، مشتق $\mathbf{h}_t$ نسبت به $\mathbf{h}_{t-1}$ برابر $$\text{diag}\big(\mathbf{1} - \mathbf{u}_t\big)$$ است و هیچ ضربی در $\boldsymbol{\Omega}_{hh}$ یا مشتق تابع فعال‌سازی $\mathbf{a}'[\cdot]$ ندارد. در واقع $\mathbf{1} - \mathbf{u}_t$ نقش دروازهٔ فراموشی و $\mathbf{u}_t$ نقش دروازهٔ ورودی LSTM را دارد، با این قید که این دو **به هم وابسته‌اند**: هرچه بیشتر اضافه شود، همان‌قدر بیشتر فراموش می‌شود.
 
 ---
 
