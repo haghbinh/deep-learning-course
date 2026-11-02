@@ -59,12 +59,6 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 | `img/` | شکل‌های جزوه‌ها |
 | `Codes/` | نوت‌بوک‌های Jupyter جلسه‌ها |
 
-جزوه‌ها با Markdown در [Obsidian](https://obsidian.md) نوشته شده‌اند و فرمول‌ها با LaTeX هستند. برای خواندن آن‌ها از نسخهٔ وب استفاده کنید، یا مخزن را دریافت و پوشه را به‌عنوان یک Vault در Obsidian باز کنید:
-
-```bash
-git clone https://github.com/haghbinh/deep-learning-course.git
-```
-
 ---
 
 ## منبع و اعتبار
