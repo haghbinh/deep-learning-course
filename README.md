@@ -27,7 +27,7 @@ Simon J. D. Prince, *Understanding Deep Learning* (MIT Press, 2023) — [udlbook
 | 7 | ۱۱ — شبکه‌های باقیمانده | معماری‌های رایج: ResNet، DenseNet و U-Net | [جلسه 7](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%207.html) | [پروژه 2](https://haghbinh.github.io/deep-learning-course/Chapter%2011/Sec%207_hw2.html) |
 | 8 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | شبکه‌های عصبی بازگشتی (RNN) | [جلسه 8](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%208.html) | |
 | 9 | تکمیلی — پیش‌زمینهٔ فصل ۱۲ | پس‌انتشار در زمان، LSTM و GRU | [جلسه 9](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%209.html) | |
-| 10 | ۱۲ — ترنسفورمرها | پردازش داده‌های متنی، نشانه‌گذاری و نهفته‌سازی | [جلسه 10](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%2010.html) | |
+| 10 | ۱۲ — ترنسفورمرها | پردازش داده‌های متنی، نهفته‌سازی و خودتوجهی ضرب نقطه‌ای | [جلسه 10](https://haghbinh.github.io/deep-learning-course/Chapter%2012/Sec%2010.html) | |
 | 11 | | | | |
 | 12 | | | | |
 | 13 | | | | |
