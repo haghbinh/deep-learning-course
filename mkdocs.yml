@@ -1,7 +1,7 @@
 # GitHub Pages site for the lecture notes.
 # Built by .github/workflows/pages.yml, which copies the notes into docs/ first
 # (the notes stay where they are, so the Obsidian vault is unchanged).
-site_name: یادگیری عمیق — جزوه‌های درس
+site_name: یادگیری عمیق 
 site_url: https://haghbinh.github.io/deep-learning-course/
 repo_url: https://github.com/haghbinh/deep-learning-course
 repo_name: haghbinh/deep-learning-course
@@ -56,7 +56,10 @@ nav:
   - "شبکه‌های بازگشتی (پیش‌زمینهٔ فصل ۱۲)":
       - "جلسه 8": Chapter 12/Sec 8.md
       - "جلسه 9": Chapter 12/Sec 9.md
-
+  - "فصل ۱۲ — ترنسفورمرها":
+      - "جلسه 10": Chapter 12/Sec 10.md
+      - "جلسه 11": Chapter 12/Sec 11.md
+      
 hooks:
   - web/hooks.py
 
