@@ -1,4 +1,4 @@
-# فصل ۱۲: ترنسفورمرها (Transformers)
+# فصل ۱۲: ترنسفورمرها (Transformers) ادامه...
 ## جلسه 11
 ---
 
@@ -30,6 +30,9 @@ $$
 
 اما ترتیب کلمه‌ها در متن معنادار است: دو جملهٔ «علی به رضا زنگ زد» و «رضا به علی زنگ زد» دقیقاً همان کلمه‌ها را دارند، ولی معنایشان متفاوت است. خودتوجهی به‌تنهایی برای کلمهٔ «علی» در هر دو جمله **همان خروجی** را می‌سازد. پس باید اطلاعات موقعیت را به‌طور صریح به مدل بدهیم.
 
+> [!note] مقایسه با کانولوشن
+> جایگشت $\mathbf{X} \mapsto \mathbf{X}\mathbf{P}$ یک تبدیل **خطی** و وارون‌پذیر است ($\mathbf{P}^{-1} = \mathbf{P}^{\top}$). انتقال دایره‌ای در CNN (جلسهٔ ۲) هم یک جایگشت خاص، یعنی جایگشت **چرخشی**، است. کانولوشن فقط نسبت به این جایگشت‌های خاص هم‌وردا است و ساختار همسایگی را حفظ می‌کند؛ اما خودتوجهی نسبت به **همهٔ** $N!$ جایگشت هم‌وردا است و هیچ اطلاعاتی از ترتیب ندارد.
+
 #### رمزگذاری موقعیت مطلق (Absolute positional encoding)
 
 ساده‌ترین راه این است که یک ماتریس $\boldsymbol{\Pi} \in \mathbb{R}^{D \times N}$ به ورودی اضافه کنیم:
@@ -49,6 +52,27 @@ $$
 $$
 
 هر جفت سطر یک موج سینوسی با بسامد متفاوت است: سطرهای بالایی با تغییر $n$ سریع نوسان می‌کنند و سطرهای پایینی بسیار کند؛ مانند عقربه‌های ثانیه‌شمار، دقیقه‌شمار و ساعت‌شمار که با هم یک زمان را به‌طور یکتا نشان می‌دهند. این رمزگذاری پارامتر ندارد و برای هر طولی تعریف می‌شود.
+
+> [!example] مثال
+> فرض کنید $D = 4$ و موقعیت‌ها را از صفر شماره‌گذاری کنیم. با فرمول بالا، سه ستون اول $\boldsymbol{\Pi}$ به صورت زیر است (سطرهای ۱ و ۲ با بسامد $1$ و سطرهای ۳ و ۴ با بسامد $1/100$):
+>
+> $$
+> \boldsymbol{\pi}_0 = \begin{bmatrix} 0 \\ 1 \\ 0 \\ 1 \end{bmatrix},
+> \qquad
+> \boldsymbol{\pi}_1 = \begin{bmatrix} 0.841 \\ 0.540 \\ 0.010 \\ 1.000 \end{bmatrix},
+> \qquad
+> \boldsymbol{\pi}_2 = \begin{bmatrix} 0.909 \\ -0.416 \\ 0.020 \\ 1.000 \end{bmatrix}
+> $$
+>
+> اگر نهفتهٔ کلمهٔ «علی» $\mathbf{x} = [0.5,\, -0.2,\, 0.1,\, 0.3]^{\top}$ باشد، این کلمه در جملهٔ «علی به رضا زنگ زد» در موقعیت ۰ و در جملهٔ «رضا به علی زنگ زد» در موقعیت ۲ است و ورودی شبکه در دو جمله متفاوت می‌شود:
+>
+> $$
+> \mathbf{x} + \boldsymbol{\pi}_0 = \begin{bmatrix} 0.5 \\ 0.8 \\ 0.1 \\ 1.3 \end{bmatrix},
+> \qquad
+> \mathbf{x} + \boldsymbol{\pi}_2 = \begin{bmatrix} 1.409 \\ -0.616 \\ 0.120 \\ 1.300 \end{bmatrix}
+> $$
+>
+> پس خودتوجهی دیگر برای «علی» در دو جمله خروجی یکسان نمی‌سازد. همچنین دیده می‌شود که سطرهای ۱ و ۲ از یک موقعیت به موقعیت بعد زیاد تغییر می‌کنند، ولی سطرهای ۳ و ۴ بسیار کند؛ سطرهای سریع موقعیت‌های نزدیک را از هم جدا می‌کنند و سطرهای کند موقعیت‌های دور را.
 
 **یادگرفتنی:** درایه‌های $\boldsymbol{\Pi}$ پارامترهایی هستند که همراه با بقیهٔ شبکه آموزش می‌بینند. در این حالت طول دنباله نمی‌تواند از بیشینهٔ $N$ در زمان آموزش بیشتر شود.
 
@@ -85,7 +109,7 @@ Pi = torch.zeros(D, N)
 Pi[0::2] = torch.sin(freq[:, None] * pos)
 Pi[1::2] = torch.cos(freq[:, None] * pos)
 
-print("with Pi          :", torch.allclose(self_attention(X @ P + Pi, *params),
+print("with Pi:", torch.allclose(self_attention(X@P+Pi,*params),
                                            self_attention(X + Pi, *params) @ P, atol=1e-6))
 ```
 
@@ -211,5 +235,200 @@ parameters: 280
 ```
 
 برای $D = 8$ تعداد پارامترها $3 \cdot 8^2 + 3 \cdot 8 + 8^2 = 280$ است که با فرمول بالا می‌خواند.
+
+---
+
+## بخش پنجم: لایه‌های ترنسفورمر (Transformer layers)
+
+خودتوجهی چندسر به‌تنهایی یک شبکه نیست؛ در ترنسفورمر، این سازوکار بخشی از یک واحد بزرگ‌تر به نام **لایهٔ ترنسفورمر** است. ورودی یک لایه ماتریس $\mathbf{X} \in \mathbb{R}^{D \times N}$ و خروجی آن ماتریسی هم‌اندازه است. لایه از چهار عمل پشت سر هم تشکیل شده است:
+
+$$
+\begin{aligned}
+\mathbf{X} &\leftarrow \mathbf{X} + \mathbf{MhSa}[\mathbf{X}] \\
+\mathbf{X} &\leftarrow \text{LayerNorm}[\mathbf{X}] \\
+\mathbf{x}_n &\leftarrow \mathbf{x}_n + \mathbf{mlp}[\mathbf{x}_n] \qquad n = 1, \ldots, N \\
+\mathbf{X} &\leftarrow \text{LayerNorm}[\mathbf{X}]
+\end{aligned}
+$$
+
+![udl_fig12_7](../img/udl_fig12_7.png)
+
+شکل بالا این چهار مرحله را نشان می‌دهد:
+
+- **ورودی و خروجی:** ورودی ماتریسی $D \times N$ شامل نهفته‌های $D$بعدی $N$ نشانه است و خروجی ماتریسی با همان اندازه است. به همین دلیل می‌توان لایه‌ها را پشت سر هم چید.
+- **بلوک خودتوجهی چندسر:** در این مرحله نهفته‌های کلمه‌ها با یکدیگر **تعامل** می‌کنند. این بلوک بخش پردازشی یک **بلوک باقیمانده** (فصل ۱۱) است؛ پس ورودی دوباره به خروجی آن اضافه می‌شود.
+- **LayerNorm:** روی هر نهفته (هر ستون) **جداگانه** اعمال می‌شود.
+- **بلوک باقیماندهٔ دوم:** یک شبکهٔ تمام‌متصل **یکسان** به‌طور جداگانه روی هر یک از $N$ ستون اعمال می‌شود و دوباره ورودی به خروجی آن اضافه می‌شود.
+- **LayerNorm نهایی:** در پایان دوباره LayerNorm اعمال می‌شود.
+
+دو بلوک نقش‌های مکمل دارند: خودتوجهی اطلاعات را **بین نشانه‌ها** جابه‌جا می‌کند ولی (جز `softmax`) تبدیل غیرخطی قوی ندارد؛ شبکهٔ تمام‌متصل هر نشانه را **به‌تنهایی** و به‌طور غیرخطی پردازش می‌کند ولی نشانه‌ها را با هم ترکیب نمی‌کند.
+
+### نرمال‌سازی لایه‌ای (LayerNorm)
+
+LayerNorm شبیه نرمال‌سازی دسته‌ای (جلسهٔ ۶) است، با این تفاوت که میانگین و واریانس را روی $D$ درایهٔ **یک نهفته** حساب می‌کند، نه روی نمونه‌های یک دسته:
+
+$$
+\text{LayerNorm}[\mathbf{x}_n] = \boldsymbol{\gamma} \odot \frac{\mathbf{x}_n - \mu_n}{\sigma_n} + \boldsymbol{\delta},
+\qquad
+\mu_n = \frac{1}{D}\sum_{d=1}^{D} x_{dn},
+\qquad
+\sigma_n^2 = \frac{1}{D}\sum_{d=1}^{D} (x_{dn} - \mu_n)^2
+$$
+
+که $\boldsymbol{\gamma}, \boldsymbol{\delta} \in \mathbb{R}^{D}$ پارامترهای یادگرفتنی مقیاس و جابه‌جایی‌اند. چون محاسبه به نمونه‌های دیگر دسته وابسته نیست، برای دنباله‌هایی با طول متغیر و دسته‌های کوچک مناسب است و در آموزش و استنتاج یکسان رفتار می‌کند.
+
+### شبکهٔ تمام‌متصل موازی
+
+شبکه $\mathbf{mlp}[\cdot]$ معمولاً یک شبکهٔ دولایه با تابع فعال‌سازی ReLU است که لایهٔ پنهانش بزرگ‌تر از ورودی است (معمولاً $4D$):
+
+$$
+\mathbf{mlp}[\mathbf{x}_n] = \boldsymbol{\beta}_2 + \boldsymbol{\Omega}_2\, \text{ReLU}\big[\boldsymbol{\beta}_1 + \boldsymbol{\Omega}_1 \mathbf{x}_n\big],
+\qquad
+\boldsymbol{\Omega}_1 \in \mathbb{R}^{4D \times D},\;
+\boldsymbol{\Omega}_2 \in \mathbb{R}^{D \times 4D}
+$$
+
+همان پارامترها برای همهٔ $N$ ستون به کار می‌روند؛ پس تعداد پارامترها به طول متن بستگی ندارد.
+
+> [!note] تعداد پارامترهای یک لایه
+> برای $D = 1024$ و $H = 16$ (با بایاس خروجی خودتوجهی، مانند PyTorch): خودتوجهی چندسر $4{,}198{,}400$، شبکهٔ تمام‌متصل $8{,}393{,}728$ و دو LayerNorm $4{,}096$ پارامتر؛ در مجموع $12{,}596{,}224$ پارامتر، یعنی حدود ۱۲٫۶ میلیون. حدود دوسوم پارامترها در شبکهٔ تمام‌متصل است.
+
+> [!note] ترتیب LayerNorm
+> ترتیب بالا (LayerNorm **پس از** جمع باقیمانده) همان طرح مقالهٔ اصلی ترنسفورمر است. در بسیاری از مدل‌های جدید LayerNorm **پیش از** خودتوجهی و شبکهٔ تمام‌متصل، درون شاخهٔ باقیمانده، قرار می‌گیرد (Pre-LN) که آموزش شبکه‌های عمیق را پایدارتر می‌کند؛ در PyTorch با `norm_first=True` انتخاب می‌شود.
+
+کد زیر یک لایهٔ ترنسفورمر را از روی چهار مرحلهٔ بالا می‌سازد و با `nn.TransformerEncoderLayer` مقایسه می‌کند:
+
+```python
+import torch
+
+torch.manual_seed(0)
+
+D, N, H = 8, 5, 2
+X = torch.randn(D, N)                          # columns are the word embeddings
+
+layer = torch.nn.TransformerEncoderLayer(d_model=D, nhead=H, dim_feedforward=4 * D,
+                                         dropout=0.0, activation="relu")
+layer.eval()
+mha, ln1, ln2 = layer.self_attn, layer.norm1, layer.norm2
+mlp = torch.nn.Sequential(layer.linear1, torch.nn.ReLU(), layer.linear2)
+
+def layer_norm(X, ln):                         # normalize each column separately
+    mu = X.mean(dim=0, keepdim=True)
+    sigma = X.var(dim=0, unbiased=False, keepdim=True).add(ln.eps).sqrt()
+    return ln.weight[:, None] * (X - mu) / sigma + ln.bias[:, None]   # gamma, delta
+
+with torch.no_grad():
+    A, _ = mha(X.T, X.T, X.T)                  # PyTorch: rows are the tokens
+    Y = layer_norm(X + A.T, ln1)               # 1) residual block with MhSa, 2) LayerNorm
+    Y = layer_norm(Y + mlp(Y.T).T, ln2)        # 3) residual block with the same MLP per column, 4) LayerNorm
+    out = layer(X.T).T
+
+print("output shape:", tuple(Y.shape))
+print("same as nn.TransformerEncoderLayer:", torch.allclose(Y, out, atol=1e-5))
+```
+
+```
+output shape: (8, 5)
+same as nn.TransformerEncoderLayer: True
+```
+
+یک ترنسفورمر از چندین لایهٔ این‌چنینی که پشت سر هم قرار گرفته‌اند ساخته می‌شود؛ مثلاً BERT پایه ۱۲ و GPT-3 ۹۶ لایه دارد.
+
+---
+
+## بخش ششم: ترنسفورمر برای پردازش زبان طبیعی
+
+اکنون همهٔ اجزای لازم را داریم و می‌توانیم ببینیم یک ترنسفورمر چگونه یک متن را پردازش می‌کند. مسیر کامل چنین است:
+
+$$
+\text{متن}
+\;\xrightarrow{\text{نشانه‌گذاری}}\;
+\mathbf{T}
+\;\xrightarrow{\;\boldsymbol{\Omega}_e\;}\;
+\mathbf{X}
+\;\xrightarrow{\;+\,\boldsymbol{\Pi}\;}\;
+\underbrace{\text{لایهٔ ترنسفورمر} \to \cdots \to \text{لایهٔ ترنسفورمر}}_{K\ \text{لایه}}
+\;\longrightarrow\;
+\text{خروجی}
+$$
+
+1. **نشانه‌گذاری:** متن با یک نشانه‌گذار زیرکلمه‌ای (مانند BPE) به $N$ نشانه شکسته می‌شود و هر نشانه یک شماره در واژه‌نامه می‌گیرد (جلسهٔ ۱۰، بخش دوم).
+2. **نهفته‌سازی:** با $\mathbf{X} = \boldsymbol{\Omega}_e\mathbf{T}$ هر نشانه به یک بردار $D$بعدی تبدیل می‌شود؛ $\boldsymbol{\Omega}_e$ همراه با بقیهٔ شبکه آموزش می‌بیند.
+3. **رمزگذاری موقعیت:** اطلاعات جایگاه نشانه‌ها به $\mathbf{X}$ افزوده می‌شود (بخش چهارم).
+4. **لایه‌های ترنسفورمر:** ماتریس $\mathbf{X}$ از $K$ لایهٔ ترنسفورمر (بخش پنجم) می‌گذرد. اندازهٔ $D \times N$ در همهٔ لایه‌ها ثابت می‌ماند.
+
+### یک مثال: دنبال کردن ابعاد
+
+متن «an aardvark ate an ant» را با $|\mathcal{V}| = 30{,}000$، $D = 1024$، $H = 16$ و $K = 12$ لایه در نظر بگیرید و فرض کنید هر کلمه یک نشانه است ($N = 5$):
+
+| مرحله | ماتریس | ابعاد | تعداد پارامترها |
+| --- | --- | --- | --- |
+| نشانه‌گذاری | $\mathbf{T}$ | $30{,}000 \times 5$ | — |
+| نهفته‌سازی | $\boldsymbol{\Omega}_e$ | $1024 \times 30{,}000$ | $30{,}720{,}000$ |
+| ورودی شبکه | $\mathbf{X}$ | $1024 \times 5$ | — |
+| ۱۲ لایهٔ ترنسفورمر | خروجی هر لایه | $1024 \times 5$ | $12 \times 12{,}596{,}224 = 151{,}154{,}688$ |
+
+در مجموع حدود ۱۸۲ میلیون پارامتر به دست می‌آید. دو نکته از این جدول:
+
+- تعداد پارامترها به طول متن $N$ بستگی **ندارد**؛ همان شبکه متن ۵ نشانه‌ای و ۵۰۰ نشانه‌ای را پردازش می‌کند. فقط حجم محاسبات با $N^2$ زیاد می‌شود.
+- بخش بزرگی از پارامترها (اینجا حدود یک‌ششم) در ماتریس نهفته‌سازی است.
+
+### نهفته‌های وابسته به بافت
+
+در شکل 12.9 (جلسهٔ ۱۰) دیدیم که دو کلمهٔ «an» در ورودی $\mathbf{X}$ بردار **یکسانی** دارند. پس از گذر از لایه‌های ترنسفورمر، هر ستون خروجی ترکیبی از اطلاعات همهٔ نشانه‌هاست و به **بافت** (Context) کلمه و جای آن بستگی دارد؛ به همین دلیل خروجی‌ها را **نهفته‌های وابسته به بافت** (Contextual embeddings) می‌نامند. کلمهٔ «شیر» در «شیر را در یخچال گذاشتم» و «شیر در جنگل غرید» در ورودی یک بردار دارد، اما در خروجی دو بردار متفاوت.
+
+کد زیر این را برای مثال بالا (با یک مدل کوچک و آموزش‌ندیده) نشان می‌دهد. نتیجهٔ سطر دوم، همان هم‌وردایی بخش چهارم است: بدون رمزگذاری موقعیت، دو «an» که ورودی یکسان دارند، خروجی یکسان هم می‌گیرند:
+
+```python
+import torch
+import torch.nn as nn
+
+torch.manual_seed(0)
+
+vocab = ["a", "aardvark", "an", "ant", "ate"]          # a tiny vocabulary
+D, H, K = 8, 2, 2                                       # embedding size, heads, layers
+
+embed = nn.Embedding(len(vocab), D)                     # Omega_e (stored transposed)
+layer = nn.TransformerEncoderLayer(d_model=D, nhead=H, dim_feedforward=4 * D, dropout=0.0)
+model = nn.TransformerEncoder(layer, num_layers=K, enable_nested_tensor=False).eval()
+
+text = "an aardvark ate an ant".split()
+tokens = torch.tensor([vocab.index(w) for w in text])   # token ids, N = 5
+N = len(tokens)
+
+pos = torch.arange(N).float()                           # sinusoidal positional encoding (N, D)
+freq = 1.0 / 10000 ** (torch.arange(0, D, 2).float() / D)
+Pi = torch.zeros(N, D)
+Pi[:, 0::2] = torch.sin(pos[:, None] * freq)
+Pi[:, 1::2] = torch.cos(pos[:, None] * freq)
+
+with torch.no_grad():
+    X = embed(tokens)                                   # (N, D): row n = embedding of token n
+    out_no_pos = model(X[:, None])[:, 0]                # K transformer layers, no position
+    out = model((X + Pi)[:, None])[:, 0]                # K transformer layers, with position
+
+# tokens 0 and 3 are both "an"
+print("input:            same vector for both 'an':", torch.equal(X[0], X[3]))
+print("output, no Pi:    same vector for both 'an':", torch.allclose(out_no_pos[0], out_no_pos[3], atol=1e-6))
+print("output, with Pi:  same vector for both 'an':", torch.allclose(out[0], out[3], atol=1e-6))
+```
+
+```
+input:            same vector for both 'an': True
+output, no Pi:    same vector for both 'an': True
+output, with Pi:  same vector for both 'an': False
+```
+
+### سه نوع مدل ترنسفورمر
+
+خروجی لایه‌ها بسته به کاربرد به سه شکل استفاده می‌شود و سه خانوادهٔ اصلی مدل را می‌سازد:
+
+| نوع | کار اصلی | نمونهٔ کاربرد | مدل مشهور |
+| --- | --- | --- | --- |
+| **رمزگذار** (Encoder) | تبدیل متن به نمایشی که برای کارهای گوناگون مفید است | تحلیل احساس، طبقه‌بندی متن، برچسب‌گذاری کلمه‌ها | BERT |
+| **رمزگشا** (Decoder) | پیش‌بینی نشانهٔ بعدی برای ادامه دادن متن | تولید متن، دستیارهای گفت‌وگو | GPT |
+| **رمزگذار–رمزگشا** (Encoder-decoder) | تبدیل یک دنباله به دنبالهٔ دیگر | ترجمهٔ ماشینی، خلاصه‌سازی | ترنسفورمر اصلی |
+
+این سه نوع با دسته‌های جلسهٔ ۸ (بخش دوم) متناظرند: رمزگذار برای کارهای چندبه‌یک و چندبه‌چند هم‌زمان، رمزگشا برای تولید دنباله (مانند یک‌به‌چند) و رمزگذار–رمزگشا برای چندبه‌چند با تأخیر. در جلسهٔ بعد هر کدام را جداگانه بررسی می‌کنیم.
 
 ---
