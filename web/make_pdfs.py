@@ -38,7 +38,8 @@ from course import (BOOK, COURSE_SUBTITLE, COURSE_TITLE, INSTRUCTOR, SITE_URL,
 ALL_PDF = "all-sessions.pdf"
 COVER_HTML = "_cover.html"
 FONT_FILE = Path(__file__).parent / "fonts" / "Vazirmatn-Regular.woff2"
-MARGIN = {"top": "18mm", "bottom": "16mm", "left": "12mm", "right": "12mm"}
+LOGO_FILE = Path(__file__).parent.parent / "img" / "pgu_logo.png"  # university logo
+MARGIN = {"top": "22mm", "bottom": "16mm", "left": "12mm", "right": "12mm"}
 
 READY_JS = """() => {
   const math = [...document.querySelectorAll('.arithmatex')]
@@ -70,6 +71,15 @@ def _font_face():
 
 FONT_FACE, HEADER_FONT = _font_face()
 
+
+def _logo_uri():
+    if not LOGO_FILE.exists():
+        return ""
+    return "data:image/png;base64," + base64.b64encode(LOGO_FILE.read_bytes()).decode()
+
+
+LOGO_URI = _logo_uri()
+
 FOOTER_NUMBERS = (
     '<div style="width:100%;font-size:8px;color:#888;text-align:center;'
     'font-family:sans-serif;"><span class="pageNumber"></span> / '
@@ -79,15 +89,18 @@ FOOTER_EMPTY = "<div></div>"  # combined PDF: numbers are stamped after merging
 
 
 def header(chapter, session):
-    """Right: course — instructor | middle: chapter | left: session."""
+    """Right: logo + course — instructor | middle: chapter | left: session."""
     e = html.escape
     cell = "flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+    logo = (f'<img src="{LOGO_URI}" style="height:11mm;width:auto;margin-left:6px">'
+            if LOGO_URI else "")
     return (
         f"{FONT_FACE}"
         f'<div dir="rtl" style="width:100%;margin:0 12mm;padding-bottom:2px;'
-        f"border-bottom:0.5px solid #bbb;display:flex;gap:10px;"
+        f"border-bottom:0.5px solid #bbb;display:flex;align-items:flex-end;gap:10px;"
         f'font-family:{HEADER_FONT};font-size:8px;color:#555;">'
-        f'<span style="{cell}text-align:right">{e(COURSE_TITLE)} — {e(INSTRUCTOR)}</span>'
+        f'<span style="{cell}text-align:right;display:flex;align-items:flex-end">'
+        f"{logo}<span>{e(COURSE_TITLE)} — {e(INSTRUCTOR)}</span></span>"
         f'<span style="{cell}text-align:center">{e(chapter)}</span>'
         f'<span style="{cell}text-align:left">{e(session)}</span></div>'
     )
@@ -274,19 +287,25 @@ def write_cover(site_dir, entries):
         for label, topic, num in entries
     )
     cover = (
-        '<div style="text-align:center;padding-top:8vh">'
-        f'<h1 style="font-size:2.6em;margin:0;color:inherit;font-weight:700">{e(COURSE_TITLE)}</h1>'
+        '<div style="text-align:center;padding-top:0">'
+        + (f'<img src="{LOGO_URI}" alt="" style="height:26mm;width:auto;margin:0 auto .8em">'
+           if LOGO_URI else "")
+        + f'<h1 style="font-size:2.6em;margin:0;color:inherit;font-weight:700">{e(COURSE_TITLE)}</h1>'
         f'<p style="font-size:1.5em;margin:.3em 0 1.6em">{e(COURSE_SUBTITLE)}</p>'
         f'<p style="font-size:1.25em;margin:0">مدرس: <strong>{e(INSTRUCTOR)}</strong></p>'
         f'<p style="font-size:1.1em;margin:.3em 0 1.6em">{e(UNIVERSITY)}</p>'
-        f'<p style="margin:0 0 2.4em">{e(BOOK)}</p>'
+        f'<p style="margin:0 0 1.6em">{e(BOOK)}</p>'
         '<table style="margin:0 auto;border-collapse:collapse;font-size:.95em;'
         f'display:table;width:auto;border:none;box-shadow:none">{rows}</table>'
-        f'<p style="margin-top:2.4em;color:#888;font-size:.85em">{e(SITE_URL)}</p>'
+        f'<p style="margin-top:1.4em;color:#888;font-size:.85em">{e(SITE_URL)}</p>'
         "</div>"
     )
+    page = shell[:start] + cover + shell[end:]
+    # full-height page layout would spill a blank second page
+    page = page.replace("</head>", "<style>html,body,.md-container,.md-main{height:auto!important;"
+                        "min-height:0!important}</style></head>", 1)
     out = site_dir / COVER_HTML
-    out.write_text(shell[:start] + cover + shell[end:], encoding="utf-8")
+    out.write_text(page, encoding="utf-8")
     return out
 
 

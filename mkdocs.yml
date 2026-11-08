@@ -59,6 +59,7 @@ nav:
   - "فصل ۱۲ — ترنسفورمرها":
       - "جلسه 10": Chapter 12/Sec 10.md
       - "جلسه 11": Chapter 12/Sec 11.md
+      - "جلسه 12": Chapter 12/Sec 12.md
       
 hooks:
   - web/hooks.py
